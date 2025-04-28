@@ -57,7 +57,7 @@ This system modernizes attendance management by integrating fingerprint verifica
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/your-repository.git
+git clone https://github.com/EmmanuelAyanleye/FINGERPRINT-ATTENDANCE-TRACKING-SYSTEM.git
 cd your-repository
 
 # Create and activate a virtual environment
