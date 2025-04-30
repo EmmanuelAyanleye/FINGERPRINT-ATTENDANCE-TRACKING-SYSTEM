@@ -112,3 +112,18 @@ admin.site.register(AcademicSession)
 admin.site.register(Semester)
 admin.site.register(Department)
 admin.site.register(Course)
+
+from .models import Message
+
+@admin.register(Message)
+class MessageAdmin(admin.ModelAdmin):
+    list_display = ('name', 'email', 'subject', 'created_at', 'is_read')
+    list_filter = ('is_read', 'created_at')
+    search_fields = ('name', 'email', 'subject', 'message')
+    date_hierarchy = 'created_at'
+    
+    def mark_as_read(self, request, queryset):
+        queryset.update(is_read=True)
+    mark_as_read.short_description = "Mark selected messages as read"
+    
+    actions = ['mark_as_read']

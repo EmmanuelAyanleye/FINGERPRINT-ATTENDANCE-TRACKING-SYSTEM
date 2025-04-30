@@ -189,3 +189,43 @@ class StudentUpdateForm(forms.ModelForm):
             'gender': forms.Select(attrs={'class': 'form-select'}),
             'level': forms.Select(attrs={'class': 'form-select'}),
         }
+
+
+from django import forms
+from .models import Message
+
+class ContactForm(forms.ModelForm):
+    class Meta:
+        model = Message
+        fields = ['name', 'email', 'subject', 'message']
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter your name'
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter your email'
+            }),
+            'subject': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter message subject'
+            }),
+            'message': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Enter your message'
+            })
+        }
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if not email:
+            raise forms.ValidationError('Email is required')
+        return email
+
+    def clean_message(self):
+        message = self.cleaned_data.get('message')
+        if len(message) < 10:
+            raise forms.ValidationError('Message must be at least 10 characters long')
+        return message

@@ -1,0 +1,702 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Attendance Dashboard</title>
+    <link
+      rel="icon"
+      href="{% static 'images/Espam logo.png' %}"
+      type="image/png"
+    />
+
+    <!-- Bootstrap & Icons -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet" />
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}" />
+
+    <!-- Scripts -->
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+    ></script>
+    <script defer src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script defer src="{% static 'js/script.js' %}"></script>
+  </head>
+  <body class="d-flex flex-column vh-100">
+    <!-- Navbar -->
+    <header>
+      <nav class="navbar navbar-expand-sm bg-primary px-3" id="navbar-example2">
+        <div class="container-fluid">
+          <a href="#" class="navbar-brand text-light">
+            <img src="{% static 'images/Espam logo.png' %}" alt="SCHOOL LOGO" />
+            <span
+              >ESPAM-FORMATION
+              <span class="d-none d-md-inline">ATTENDANCE SYSTEM</span></span
+            >
+          </a>
+          <div class="justify-content-end">
+            <div class="d-flex align-items-center">
+              <div class="nav-item text-light pt-2 px-3 d-none d-md-inline">
+                Welcome back, <span id="name">Admin</span>
+              </div>
+
+              <div class="d-none d-sm-inline">
+                <ul class="navbar-nav ms-auto">
+                  <li class="nav-item">
+                    <a
+                      href="#"
+                      data-bs-toggle="dropdown"
+                      class="nav-icon pe-md-0"
+                    >
+                      <img
+                        src="{% static 'images/account.png' %}"
+                        class="avatar img-fluid"
+                        alt="User Account"
+                      />
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Message Icon with Badge -->
+              <div class="nav-item me-3 position-relative ps-3">
+                <a
+                  href="{% url 'admin_messages' %}"
+                  class="nav-link text-light"
+                >
+                  <i class="lni lni-envelope fs-5"></i>
+                  <span
+                    class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                    id="message-badge"
+                  >
+                    0
+                  </span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Add this script before the closing body tag -->
+          <script>
+            function updateMessageCount() {
+              fetch("/get-unread-messages-count/")
+                .then((response) => response.json())
+                .then((data) => {
+                  const badge = document.getElementById("message-badge");
+                  badge.textContent = data.unread_count;
+                  badge.style.display =
+                    data.unread_count > 0 ? "block" : "none";
+                })
+                .catch((error) =>
+                  console.error("Error fetching message count:", error)
+                );
+            }
+
+            // Update message count every 30 seconds
+            updateMessageCount();
+            setInterval(updateMessageCount, 30000);
+          </script>
+        </div>
+      </nav>
+    </header>
+
+    <!-- Content Section -->
+    <div class="d-flex flex-grow-1">
+      <!-- Sidebar -->
+      <aside id="sidebar">
+        <div class="d-flex">
+          <button class="toggle-btn" type="button">
+            <i class="lni lni-grid-alt"></i>
+          </button>
+          <div class="sidebar-logo">
+            <a href="#">Menu</a>
+          </div>
+        </div>
+        <ul class="sidebar-nav">
+          <li class="sidebar-item">
+            <a href="{% url 'admin_dashboard' %}" class="sidebar-link">
+              <i class="lni lni-home"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="{% url 'report' %}" class="sidebar-link">
+              <i class="lni lni-stats-up"></i>
+              <span>View Reports</span>
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="{% url 'admin_summary' %}" class="sidebar-link">
+              <i class="lni lni-bar-chart"></i>
+              <span>Attendance Summary</span>
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a
+              href="#"
+              class="sidebar-link collapsed has-dropdown"
+              data-bs-toggle="collapse"
+              data-bs-target="#student"
+              aria-expanded="false"
+              aria-controls="student"
+            >
+              <i class="lni lni-user"></i>
+              <span>Manage Student</span>
+            </a>
+            <ul
+              id="student"
+              class="sidebar-dropdown list-unstyled collapse"
+              data-bs-parent="#sidebar"
+            >
+              <li class="sidebar-item">
+                <a href="{% url 'add_student' %}" class="sidebar-link"
+                  >Add student</a
+                >
+              </li>
+              <li class="sidebar-item">
+                <a href="{% url 'modify_student' %}" class="sidebar-link"
+                  >View Students</a
+                >
+              </li>
+            </ul>
+          </li>
+          <li class="sidebar-item">
+            <a
+              href="#"
+              class="sidebar-link collapsed has-dropdown"
+              data-bs-toggle="collapse"
+              data-bs-target="#lecturer"
+              aria-expanded="false"
+              aria-controls="lecturer"
+            >
+              <i class="lni lni-graduation"></i>
+              <span>Manage Lecturer</span>
+            </a>
+            <ul
+              id="lecturer"
+              class="sidebar-dropdown list-unstyled collapse"
+              data-bs-parent="#sidebar"
+            >
+              <li class="sidebar-item">
+                <a href="{% url 'add_lecturer' %}" class="sidebar-link"
+                  >Add Lecturer</a
+                >
+              </li>
+              <li class="sidebar-item">
+                <a href="{% url 'modify_lecturer' %}" class="sidebar-link"
+                  >View Lecturers</a
+                >
+              </li>
+            </ul>
+          </li>
+          <li class="sidebar-item">
+            <a
+              href="#"
+              class="sidebar-link collapsed has-dropdown"
+              data-bs-toggle="collapse"
+              data-bs-target="#course"
+              aria-expanded="false"
+              aria-controls="course"
+            >
+              <i class="lni lni-book"></i>
+              <span>Manage Course</span>
+            </a>
+            <ul
+              id="course"
+              class="sidebar-dropdown list-unstyled collapse"
+              data-bs-parent="#sidebar"
+            >
+              <li class="sidebar-item">
+                <a href="{% url 'course' %}" class="sidebar-link">Add Course</a>
+              </li>
+              <li class="sidebar-item">
+                <a href="{% url 'modify_course' %}" class="sidebar-link"
+                  >View Courses</a
+                >
+              </li>
+            </ul>
+          </li>
+          <li class="sidebar-item">
+            <a href="{% url 'settings' %}" class="sidebar-link">
+              <i class="lni lni-cog"></i>
+              <span>Settings</span>
+            </a>
+          </li>
+        </ul>
+        <div class="sidebar-footer">
+          <a href="#" class="sidebar-link" id="logout-link">
+            <i class="lni lni-exit"></i>
+            <span>Logout</span>
+          </a>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="flex-grow-1 overflow-auto">
+        <div class="container py-4" id="main-content">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-4">Messages</h2>
+            <div>
+              <button
+                class="btn btn-outline-primary me-2"
+                onclick="markAllRead()"
+              >
+                <i class="lni lni-checkmark"></i> Mark All as Read
+              </button>
+            </div>
+          </div>
+
+          <div class="border-0 shadow-sm">
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Status</th>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Subject</th>
+                      <th>Date</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for message in messages %}
+                    <tr {% if not message.is_read %}class="table-light fw-bold"{% endif %}>
+                        <td>
+                            <span class="badge {% if message.is_read %}bg-success{% else %}bg-warning{% endif %}">
+                                {% if message.is_read %}
+                                    Read
+                                {% else %}
+                                    Unread
+                                {% endif %}
+                            </span>
+                        </td>
+                        <td {% if not message.is_read %}class="fw-bold"{% endif %}>
+                            {{ message.name }}
+                        </td>
+                        <td {% if not message.is_read %}class="fw-bold"{% endif %}>
+                            {{ message.email }}
+                        </td>
+                        <td {% if not message.is_read %}class="fw-bold"{% endif %}>
+                            {{ message.subject }}
+                        </td>
+                        <td {% if not message.is_read %}class="fw-bold"{% endif %}>
+                            {{ message.created_at|date:"M d, Y H:i" }}
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-primary" onclick="viewMessage('{{ message.id }}')">
+                                <i class="lni lni-eye"></i> View
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteMessage('{{ message.id }}')">
+                                <i class="lni lni-trash-can"></i> Delete
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Message View Modal -->
+        <!-- Message View Modal -->
+        <div
+          class="modal fade"
+          id="messageModal"
+          tabindex="-1"
+          aria-labelledby="messageModalLabel"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="messageModalLabel">
+                  Message Details
+                </h5>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                ></button>
+              </div>
+              <div class="modal-body">
+                <div id="messageContent">
+                  <div class="mb-3">
+                    <strong>From:</strong> <span id="modalName"></span>
+                  </div>
+                  <div class="mb-3">
+                    <strong>Email:</strong> <span id="modalEmail"></span>
+                  </div>
+                  <div class="mb-3">
+                    <strong>Subject:</strong> <span id="modalSubject"></span>
+                  </div>
+                  <div class="mb-3">
+                    <strong>Message:</strong>
+                    <p id="modalMessage" class="mt-2"></p>
+                  </div>
+                  <div class="mb-3">
+                    <strong>Received:</strong> <span id="modalDate"></span>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  data-bs-dismiss="modal"
+                >
+                  Close
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  id="toggleReadBtn"
+                >
+                  Mark as Read
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          // Initialize Bootstrap modal
+          const messageModal = new bootstrap.Modal(
+            document.getElementById("messageModal")
+          );
+
+          // Function to get CSRF token
+          function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== "") {
+              const cookies = document.cookie.split(";");
+              for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === name + "=") {
+                  cookieValue = decodeURIComponent(
+                    cookie.substring(name.length + 1)
+                  );
+                  break;
+                }
+              }
+            }
+            return cookieValue;
+          }
+
+          // View Message
+          window.viewMessage = function (messageId) {
+            fetch(`/get-message/${messageId}/`)
+              .then((response) => response.json())
+              .then((data) => {
+                document.getElementById("modalName").textContent = data.name;
+                document.getElementById("modalEmail").textContent = data.email;
+                document.getElementById("modalSubject").textContent =
+                  data.subject;
+                document.getElementById("modalMessage").textContent =
+                  data.message;
+                document.getElementById("modalDate").textContent = new Date(
+                  data.created_at
+                ).toLocaleString();
+
+                const toggleBtn = document.getElementById("toggleReadBtn");
+                toggleBtn.textContent = data.is_read
+                  ? "Mark as Unread"
+                  : "Mark as Read";
+                toggleBtn.onclick = () =>
+                  toggleReadStatus(messageId, !data.is_read);
+
+                messageModal.show();
+              })
+              .catch((error) => console.error("Error:", error));
+          };
+
+          // Delete Message
+          window.deleteMessage = function (messageId) {
+            if (confirm("Are you sure you want to delete this message?")) {
+              fetch(`/delete-message/${messageId}/`, {
+                method: "DELETE",
+                headers: {
+                  "X-CSRFToken": getCookie("csrftoken"),
+                },
+              })
+                .then((response) => {
+                  if (response.ok) {
+                    window.location.reload();
+                  } else {
+                    throw new Error("Delete failed");
+                  }
+                })
+                .catch((error) => {
+                  console.error("Error:", error);
+                  alert("Failed to delete message");
+                });
+            }
+          };
+
+          // Mark All as Read
+          window.markAllRead = function () {
+            fetch("/mark-all-messages-read/", {
+              method: "POST",
+              headers: {
+                "X-CSRFToken": getCookie("csrftoken"),
+              },
+            })
+              .then((response) => {
+                if (response.ok) {
+                  window.location.reload();
+                } else {
+                  throw new Error("Operation failed");
+                }
+              })
+              .catch((error) => {
+                console.error("Error:", error);
+                alert("Failed to mark messages as read");
+              });
+          };
+
+          // Toggle Read Status
+          window.toggleReadStatus = function (messageId, isRead) {
+            fetch(`/toggle-message-status/${messageId}/`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie("csrftoken"),
+              },
+              body: JSON.stringify({ is_read: isRead }),
+            })
+              .then((response) => {
+                if (response.ok) {
+                  window.location.reload();
+                } else {
+                  throw new Error("Toggle failed");
+                }
+              })
+              .catch((error) => {
+                console.error("Error:", error);
+                alert("Failed to update message status");
+              });
+          };
+        });
+      </script>
+
+      <script>
+        let messageModal;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize the modal
+            messageModal = new bootstrap.Modal(document.getElementById('messageModal'));
+        });
+
+        function viewMessage(messageId) {
+            fetch(`/get-message/${messageId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('modalName').textContent = data.name;
+                    document.getElementById('modalEmail').textContent = data.email;
+                    document.getElementById('modalSubject').textContent = data.subject;
+                    document.getElementById('modalMessage').textContent = data.message;
+                    document.getElementById('modalDate').textContent = new Date(data.created_at).toLocaleString();
+
+                    const toggleBtn = document.getElementById('toggleReadBtn');
+                    toggleBtn.textContent = data.is_read ? 'Mark as Unread' : 'Mark as Read';
+                    toggleBtn.onclick = () => toggleReadStatus(messageId, !data.is_read);
+
+                    // Show the modal
+                    messageModal.show();
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function toggleReadStatus(messageId, isRead) {
+            fetch(`/toggle-message-status/${messageId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ is_read: isRead })
+            })
+            .then(response => response.json())
+            .then(() => {
+                messageModal.hide();
+                window.location.reload();
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function deleteMessage(messageId) {
+            if (confirm('Are you sure you want to delete this message?')) {
+                fetch(`/delete-message/${messageId}/`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                })
+                .then(() => window.location.reload());
+            }
+        }
+
+        function markAllRead() {
+            fetch('/mark-all-messages-read/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(() => window.location.reload());
+        }
+
+        function getCookie(name) {
+            let value = `; ${document.cookie}`;
+            let parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+        // Add some CSS for unread messages
+        <style>
+        .fw-bold {
+            font-weight: 600 !important;
+        }
+
+        tr.table-light.fw-bold {
+            background-color: rgba(0, 123, 255, 0.05);
+        }
+
+        tr.table-light.fw-bold:hover {
+            background-color: rgba(0, 123, 255, 0.1);
+        }
+        </style>
+      </script>
+    </div>
+    <!-- Add this script before the closing body tag -->
+    <script>
+      function updateDashboardStats() {
+        fetch("/get-dashboard-stats/")
+          .then((response) => response.json())
+          .then((data) => {
+            // Update total students
+            document.getElementById("totalStudents").textContent =
+              data.total_students.toLocaleString();
+
+            // Update total attendance
+            document.getElementById("totalAttendance").textContent =
+              data.total_attendance.toLocaleString();
+            const attendanceBadge = document.getElementById("attendanceBadge");
+            attendanceBadge.textContent = `${
+              data.attendance_change > 0 ? "+" : ""
+            }${data.attendance_change}%`;
+            attendanceBadge.className = `badge ${
+              data.attendance_change >= 0 ? "bg-success" : "bg-danger"
+            }`;
+
+            // Update today's attendance
+            document.getElementById("todayAttendance").textContent =
+              data.todays_attendance.toLocaleString();
+            const todayBadge = document.getElementById("todayBadge");
+            todayBadge.textContent = `${data.today_change > 0 ? "+" : ""}${
+              data.today_change
+            }%`;
+            todayBadge.className = `badge ${
+              data.today_change >= 0 ? "bg-success" : "bg-danger"
+            }`;
+          })
+          .catch((error) => {
+            console.error("Error fetching dashboard stats:", error);
+          });
+      }
+
+      // Update stats immediately and then every 30 seconds
+      updateDashboardStats();
+      setInterval(updateDashboardStats, 30000);
+    </script>
+
+    <!-- Move these outside the sidebar but before closing body tag -->
+    <form
+      method="POST"
+      action="{% url 'logout' %}"
+      id="logout-form"
+      style="display: none"
+    >
+      {% csrf_token %}
+    </form>
+
+    <div
+      class="modal fade"
+      id="logoutModal"
+      tabindex="-1"
+      aria-labelledby="logoutModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="logoutModalLabel">Confirm Logout</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">Are you sure you want to logout?</div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Cancel
+            </button>
+            <button type="button" class="btn btn-danger" id="confirm-logout">
+              Logout
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Update the script -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const logoutLink = document.getElementById("logout-link");
+        const logoutForm = document.getElementById("logout-form");
+        const confirmLogout = document.getElementById("confirm-logout");
+
+        if (logoutLink) {
+          logoutLink.addEventListener("click", function (event) {
+            event.preventDefault();
+            const logoutModal = new bootstrap.Modal(
+              document.getElementById("logoutModal")
+            );
+            logoutModal.show();
+          });
+        }
+
+        if (confirmLogout) {
+          confirmLogout.addEventListener("click", function () {
+            if (logoutForm) {
+              logoutForm.submit();
+            }
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

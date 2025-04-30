@@ -2,13 +2,16 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import CustomUser
+from .models import CustomUser, Message
 from .forms import LecturerRegistrationForm, StudentUpdateForm
 from django.contrib.auth.decorators import user_passes_test
 from .forms import StudentForm
 from django.contrib.sessions.models import Session
 from django.utils import timezone
 from django.urls import reverse
+
+from django.contrib import messages
+from .forms import ContactForm
 
 from .models import Lecturer
 from .forms import CourseForm
@@ -114,8 +117,82 @@ def logout_view(request):
 
 
 def index(request):
-    return render(request, 'home/index.html')  # Render the homepage template
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
+        try:
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Your message has been sent successfully!')
+                return redirect('index')
+            else:
+                # Add specific form error messages
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f'{field.title()}: {error}')
+        except Exception as e:
+            messages.error(request, f'Error sending message: {str(e)}')
+    else:
+        form = ContactForm()
+    
+    return render(request, 'home/index.html', {'form': form})
 
+
+@require_http_methods(["GET"])
+def admin_messages(request):
+    messages = Message.objects.all().order_by('-created_at')
+    unread_count = Message.objects.filter(is_read=False).count()
+    
+    context = {
+        'messages': messages,
+        'unread_count': unread_count
+    }
+    return render(request, 'home/admin_messages.html', context)
+
+def get_unread_messages_count(request):
+    unread_count = Message.objects.filter(is_read=False).count()
+    return JsonResponse({'unread_count': unread_count})
+
+
+@require_http_methods(["GET"])
+def get_message(request, message_id):
+    message = get_object_or_404(Message, id=message_id)
+    return JsonResponse({
+        'id': message.id,
+        'name': message.name,
+        'email': message.email,
+        'subject': message.subject,
+        'message': message.message,
+        'created_at': message.created_at.isoformat(),
+        'is_read': message.is_read
+    })
+
+@require_http_methods(["POST"])
+def toggle_message_status(request, message_id):
+    try:
+        message = get_object_or_404(Message, id=message_id)
+        data = json.loads(request.body)
+        message.is_read = data.get('is_read', True)
+        message.save()
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+@require_http_methods(["DELETE"])
+def delete_message(request, message_id):
+    try:
+        message = get_object_or_404(Message, id=message_id)
+        message.delete()
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+@require_http_methods(["POST"])
+def mark_all_messages_read(request):
+    try:
+        Message.objects.filter(is_read=False).update(is_read=True)
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
 
 from django.db.models import Q

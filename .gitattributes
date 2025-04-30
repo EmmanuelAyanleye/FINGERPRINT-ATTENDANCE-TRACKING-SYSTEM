@@ -1,0 +1,11 @@
+# Tell GitHub linguist which files are real source code
+*.py linguist-language=Python
+*.html linguist-language=HTML
+*.css linguist-language=CSS
+*.js linguist-language=JavaScript
+
+# Ignore auto-generated and static files when calculating languages
+/static/** linguist-vendored
+/media/** linguist-vendored
+*.sqlite3 linguist-generated
+*.json linguist-generated
